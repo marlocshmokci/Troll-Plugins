@@ -1,0 +1,41 @@
+name: Run TrollAutoReply
+
+on:
+  workflow_dispatch:  # Запуск вручную с кнопки
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install telethon g4f
+
+      - name: Create config from secrets
+        run: |
+          echo "API_ID = ${{ secrets.API_ID }}" > config.py
+          echo "API_HASH = '${{ secrets.API_HASH }}'" >> config.py
+          echo "MY_USER_ID = ${{ secrets.MY_USER_ID }}" >> config.py
+
+      - name: Run the bot
+        run: |
+          python client.py
+
+      - name: Upload logs (if needed)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bot-logs
+          path: |
+            *.log
+            *.txt
+            *.session
